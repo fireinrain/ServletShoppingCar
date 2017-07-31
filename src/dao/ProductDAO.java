@@ -3,6 +3,7 @@ package dao;
 /**
  * Created by Administrator on 2017/7/30.
  */
+
 import bean.Product;
 
 import java.sql.*;
@@ -11,14 +12,42 @@ import java.util.List;
 
 public class ProductDAO {
 
+    public ProductDAO() {
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+        }catch (ClassNotFoundException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public Connection getConnection() throws SQLException{
+        return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/cart?characterEncoding=UTF-8","root","root");
+    }
+
+    //获得总数
+    public int getTotal(){
+        int total = 0;
+        try(Connection c = getConnection(); Statement s = c.createStatement()){
+            String sql = "select count(*) from product";
+
+            ResultSet resultSet = s.executeQuery(sql);
+            while (resultSet.next()){
+                total = resultSet.getInt(1);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return total;
+    }
 
     //查询所有结果
     public List<Product> listProduct(){
         List<Product> products = new ArrayList <>();
 
         try{
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection c = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/cart?characterEncoding=UTF-8","root","root");
+
+            Connection c = getConnection();
 
             String sql = "select * from product order by id desc";
 
@@ -35,14 +64,13 @@ public class ProductDAO {
                 product.setId(id);
                 product.setName(name);
                 product.setPrice(price);
-
+                products.add(product);
 
             }
             ps.close();
             c.close();
 
-        }catch (ClassNotFoundException e){
-            e.printStackTrace();
+
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -54,8 +82,117 @@ public class ProductDAO {
 
     //增加产品
     public void addProduct(Product  p){
+        String name = p.getName();
+        float price = p.getPrice();
+
+
+        try{
+
+            Connection c = getConnection();
+
+            String sql = "INSERT INTO product VALUES (?,?)";
+
+            PreparedStatement ps = c.prepareStatement(sql);
+
+            ps.setString(1,name);
+            ps.setFloat(2,price);
+            ps.execute();
+
+            ResultSet resultSet = ps.getGeneratedKeys();
+            int id = resultSet.getInt(1);
+            ps.close();
+            c.close();
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    //修改产品
+    public void editProduct(Product product){
+        try{
+
+            Connection c = getConnection();
+
+            String sql = "UPDATE product SET name=?,price=? where id="+product.getId();
+
+            PreparedStatement ps = c.prepareStatement(sql);
+            ps.setString(1,product.getName());
+            ps.setFloat(2,product.getPrice());
+            ResultSet resultSet = ps.executeQuery();
+
+
+            ps.close();
+            c.close();
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    //查找产品
+    public Product searchProduct(int id){
+        try{
+
+            Connection c = getConnection();
+
+            String sql = "SELECT name,price from product where id ="+id;
+
+            PreparedStatement ps = c.prepareStatement(sql);
+
+            ResultSet resultSet = ps.executeQuery();
+            Product product = new Product();
+            while (resultSet.next()){
+
+                int p_id = id;
+                String name = resultSet.getString(2);
+                float price = resultSet.getFloat(3);
+
+                product.setId(p_id);
+                product.setName(name);
+                product.setPrice(price);
+
+
+
+            }
+
+
+            ps.close();
+            c.close();
+
+            return product;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //删除产品
+    public void deletProduct(int id){
+        try{
+
+            Connection c = getConnection();
+
+            String sql = "DELETE from product where id ="+id;
+
+            PreparedStatement ps = c.prepareStatement(sql);
+
+            ResultSet resultSet = ps.executeQuery();
+            Product product = new Product();
+
+            ps.close();
+            c.close();
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
 
     }
+
 
 
 }
