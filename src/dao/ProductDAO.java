@@ -84,22 +84,22 @@ public class ProductDAO {
     public void addProduct(Product  p){
         String name = p.getName();
         float price = p.getPrice();
-
+        int id = p.getId();
 
         try{
 
             Connection c = getConnection();
 
-            String sql = "INSERT INTO product VALUES (?,?)";
+            String sql = "INSERT INTO product VALUES (?,?,?)";
 
             PreparedStatement ps = c.prepareStatement(sql);
 
-            ps.setString(1,name);
-            ps.setFloat(2,price);
+            ps.setInt(1,id);
+            ps.setString(2,name);
+            ps.setFloat(3,price);
             ps.execute();
 
-            ResultSet resultSet = ps.getGeneratedKeys();
-            int id = resultSet.getInt(1);
+
             ps.close();
             c.close();
 
@@ -120,7 +120,7 @@ public class ProductDAO {
             PreparedStatement ps = c.prepareStatement(sql);
             ps.setString(1,product.getName());
             ps.setFloat(2,product.getPrice());
-            ResultSet resultSet = ps.executeQuery();
+            ps.execute();
 
 
             ps.close();
@@ -141,14 +141,14 @@ public class ProductDAO {
             String sql = "SELECT name,price from product where id ="+id;
 
             PreparedStatement ps = c.prepareStatement(sql);
-
+            int p_id = id;
             ResultSet resultSet = ps.executeQuery();
             Product product = new Product();
             while (resultSet.next()){
 
-                int p_id = id;
-                String name = resultSet.getString(2);
-                float price = resultSet.getFloat(3);
+
+                String name = resultSet.getString(1);
+                float price = resultSet.getFloat(2);
 
                 product.setId(p_id);
                 product.setName(name);
@@ -180,8 +180,8 @@ public class ProductDAO {
 
             PreparedStatement ps = c.prepareStatement(sql);
 
-            ResultSet resultSet = ps.executeQuery();
-            Product product = new Product();
+            ps.execute();
+
 
             ps.close();
             c.close();
