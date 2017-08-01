@@ -17,7 +17,7 @@ public class ProductListServlet extends HttpServlet{
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<Product> products = new ProductDAO().listProduct();
-        System.out.println(products.toString());
+        //System.out.println(products.toString());
         resp.setCharacterEncoding("UTF-8");
         req.setAttribute("products",products);
         req.getRequestDispatcher("listProduct.jsp").forward(req,resp);
